@@ -1,0 +1,104 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <style>
+      body {
+        min-width: 310px;
+        max-width: 800px;
+        height: 400px;
+        margin: 0 auto;
+      }
+      h2 {
+        font-family: Arial;
+        font-size: 2.5rem;
+        text-align: center;
+      }
+      .csv-writter {
+        display: none;
+      }
+      #copyCSV{
+        padding: 1rem;
+        background-color: forestgreen;
+        color: white;
+        border-radius: 1rem;
+        font-size: 1rem;
+        font-weight: bold;
+      }
+      #copyCSV:focus{
+        background-color: darkgreen;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Conta-Gotas</h2>
+    <h3 id="receiver"></h3>
+    <div id="chart" class="container"></div>
+    <div class="csv-writter">
+      <p id="time-head">tempo</p>
+      <p id="value-head">valor</p>
+    </div>
+    <button id="copyCSV">Copiar CSV</button>
+    <script>
+      document.getElementById("copyCSV").addEventListener("click", copyCSV);
+      
+      let timeHead = document.getElementById("time-head");
+      let valueHead = document.getElementById("value-head");
+
+      function copyCSV(){
+        let timeText = timeHead.innerText;
+        let valueText = valueHead.innerText;
+        let copyText = `${timeText}\n${valueText}`;
+        navigator.clipboard.writeText(copyText);
+        alert("CSV copiado!");
+      }
+      function storeValues(x, y){
+        timeHead.innerText = timeHead.innerText + "," + x;
+        valueHead.innerText = valueHead.innerText + "," + y;
+      }
+    
+      const serverESP = "http://192.168.214.61:80";
+    
+      var chartT = new Highcharts.Chart({
+        chart:{ renderTo : 'chart' },
+        title: { text: 'Gotas' },
+        series: [{
+          showInLegend: false,
+          data: []
+        }],
+        plotOptions: {
+          line: { animation: false,
+            dataLabels: { enabled: true }
+          },
+          series: { color: '#059e8a' }
+        },
+        xAxis: { type: 'datetime',
+          dateTimeLabelFormats: { second: '%H:%M:%S' }
+        },
+        yAxis: {
+          title: { text: 'Leitura do sensor' },
+          max: 4095
+        },
+        credits: { enabled: false }
+      });
+      setInterval(function ( ) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            var x = (new Date()).getTime(),
+                y = parseFloat(this.responseText);
+            storeValues(x,y);
+            if(chartT.series[0].data.length > 40) {
+              chartT.series[0].addPoint([x, y], true, true, true);
+            } else {
+              chartT.series[0].addPoint([x, y], true, false, true);
+            }
+          }
+        };
+        xhttp.open("GET", serverESP, true);
+        xhttp.send();
+      }, 10 ) ;
+    </script>
+  </body>
+</html>
