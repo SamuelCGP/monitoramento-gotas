@@ -3,11 +3,11 @@
 #include <HTTPClient.h>
 
 // Replace with your network credentials
-const char* ssid     = "Zapman";
-const char* password = "1zap2zap";
+const char* ssid = "name";
+const char* password = "password";
 
 // REPLACE with your Domain name and URL path or IP address with path
-const char* serverName = "http://192.168.191.45:8080/gotas/post-data.php";
+const char* serverName = "http://localhost/gotas/post-data.php";
 
 // Keep this API Key value to be compatible with the PHP code provided in the project page. 
 // If you change the apiKeyValue value, the PHP file /post-esp-data.php also needs to have the same key 
